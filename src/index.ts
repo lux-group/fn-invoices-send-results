@@ -27,6 +27,7 @@ const isFolderDirectory = (key: string): boolean => key[key.length - 1] === "/";
 
 const processKeys = (keyList: string[]): ProcessedKey[] => {
   const processedKeyList: ProcessedKey[] = [];
+
   keyList.forEach(key => {
     const keyLookedUp = lookupFromKeyWhitelist(key);
     if (keyLookedUp) {
@@ -36,6 +37,7 @@ const processKeys = (keyList: string[]): ProcessedKey[] => {
       });
     }
   });
+  
   return processedKeyList;
 };
 
@@ -44,6 +46,7 @@ const mergeProcessResults = async (
   srcBucket: string
 ): Promise<ProcessedResult> => {
   const result: ProcessedResult = {} as ProcessedResult;
+
   for (const key of keyList) {
     const response = await s3
       .getObject({
@@ -59,9 +62,11 @@ const mergeProcessResults = async (
       }
     ] = JSON.parse(response.Body?.toString() || "");
   }
+
   if (!result.kvp || !result.meta) {
     throw new FileValidationError("Result not containing all required data");
   }
+
   return result;
 };
 
@@ -71,6 +76,7 @@ const moveToProcessed = async (
 ): Promise<void> => {
   const copyRequests: Promise<object>[] = [];
   const deleteRequests: Promise<object>[] = [];
+
   keyList.forEach(key => {
     if (!isFolderDirectory(key)) {
       copyRequests.push(
@@ -92,6 +98,7 @@ const moveToProcessed = async (
       );
     }
   });
+
   await Promise.all(copyRequests);
   await Promise.all(deleteRequests);
 };
@@ -112,9 +119,6 @@ const getVendorDomain = (srcKey: string): string => {
 
 export const handler = async (event: S3Event): Promise<string> => {
   const srcBucket = event.Records[0].s3.bucket.name;
-  if (srcBucket !== BUCKET_NAME) {
-    throw new BucketValidationError("Invalid access to the bucket");
-  }
   const srcKey = decodeURIComponent(event.Records[0].s3.object.key);
   const path = srcKey.slice(0, srcKey.lastIndexOf("/") + 1);
   const listParams = {
@@ -123,6 +127,10 @@ export const handler = async (event: S3Event): Promise<string> => {
     Prefix: path
   };
   try {
+    if (srcBucket !== BUCKET_NAME) {
+      throw new BucketValidationError("Invalid access to the bucket");
+    }
+
     const objectList = await s3.listObjectsV2(listParams).promise();
     if (!objectList.Contents || objectList.Contents.length < 1) {
       throw new FileValidationError("Failed to access files under /extracted");
@@ -135,7 +143,9 @@ export const handler = async (event: S3Event): Promise<string> => {
 
     const vendorDomain = getVendorDomain(srcKey);
     await sendInvoiceData(invoiceData, vendorDomain);
+
     await moveToProcessed(keyList, srcBucket);
+
     return "Finished moving files.";
   } catch (error) {
     return JSON.stringify(error, null, 2);
