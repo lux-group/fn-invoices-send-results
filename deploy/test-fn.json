@@ -1,5 +1,5 @@
 {
-    "FunctionName": "fn-stp-textract-results-test",
+    "FunctionName": "fn-invoices-send-results-test",
     "Runtime": "nodejs12.x",
     "Role": "arn:aws:iam::801230920622:role/le-test-stp-execution",
     "Handler": "index.handler",
