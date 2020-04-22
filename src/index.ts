@@ -1,6 +1,5 @@
 import { S3 } from "aws-sdk";
 import { S3Event } from "aws-lambda";
-import { BUCKET_NAME } from "./config";
 import { sendInvoiceData } from "./invoiceService";
 import {
   ProcessedKey,
@@ -37,7 +36,6 @@ const processKeys = (keyList: string[]): ProcessedKey[] => {
       });
     }
   });
-  
   return processedKeyList;
 };
 
@@ -46,6 +44,8 @@ const mergeProcessResults = async (
   srcBucket: string
 ): Promise<ProcessedResult> => {
   const result: ProcessedResult = {} as ProcessedResult;
+
+  console.log(`Merging files ${keyList.join(",")} in ${srcBucket}`);
 
   for (const key of keyList) {
     const response = await s3
@@ -76,6 +76,8 @@ const moveToProcessed = async (
 ): Promise<void> => {
   const copyRequests: Promise<object>[] = [];
   const deleteRequests: Promise<object>[] = [];
+
+  console.log(`Merging files ${keyList.join(",")} in ${srcBucket}`);
 
   keyList.forEach(key => {
     if (!isFolderDirectory(key)) {
@@ -127,10 +129,7 @@ export const handler = async (event: S3Event): Promise<string> => {
     Prefix: path
   };
   try {
-    if (srcBucket !== BUCKET_NAME) {
-      throw new BucketValidationError("Invalid access to the bucket");
-    }
-
+    console.log(`Fetching invoice data files under ${path} in ${srcBucket}`);
     const objectList = await s3.listObjectsV2(listParams).promise();
     if (!objectList.Contents || objectList.Contents.length < 1) {
       throw new FileValidationError("Failed to access files under /extracted");
@@ -146,8 +145,10 @@ export const handler = async (event: S3Event): Promise<string> => {
 
     await moveToProcessed(keyList, srcBucket);
 
-    return "Finished moving files.";
+    console.log("SUCCESS")
+    return "Finished sending results with files moved to /processed";
   } catch (error) {
+    console.error(`FAILURE: ${error.message}`)
     return JSON.stringify(error, null, 2);
   }
 };

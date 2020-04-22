@@ -1,7 +1,7 @@
 import LRU from "lru-cache";
 import fetch from "node-fetch";
 import querystring from "querystring";
-import { SERVICE_PASSWORD, API_HOST, APP_NAME } from "../config";
+import { SERVICE_PASSWORD, API_HOST, SERVICE_USERNAME } from "../config";
 
 class AuthServiceHTTPError extends Error {}
 
@@ -12,6 +12,7 @@ const CACHE_KEY = "access-token";
 const cache = new LRU({ maxAge: CACHE_TIMEOUT });
 
 export async function getToken(): Promise<string> {
+  console.log(`Retrieving access token`);
   const token = cache.get(CACHE_KEY) as string;
 
   if (token) {
@@ -19,7 +20,7 @@ export async function getToken(): Promise<string> {
   }
 
   const credentials = {
-    username: `operations+${APP_NAME}@luxgroup.com`,
+    username: SERVICE_USERNAME,
     password: SERVICE_PASSWORD,
     grant_type: "client_credentials"
   };

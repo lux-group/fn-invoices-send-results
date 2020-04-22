@@ -15,7 +15,7 @@
     "Environment": {
       "Variables": {
         "BUCKET_NAME": "le-test-stp-textract-results",
-        "NODE_ENV": "production",
+        "NODE_ENV": "test",
         "APP_NAME": "test-fn-invoices-send-results"
       }
     },
