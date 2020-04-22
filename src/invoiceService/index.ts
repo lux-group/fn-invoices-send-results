@@ -5,6 +5,8 @@ import { ProcessedResult } from "../types";
 
 class InvoiceServiceHTTPError extends Error {}
 
+class InvoiceValidationError extends Error {}
+
 export async function sendInvoiceData(
   invoiceData: ProcessedResult,
   vendorDomain: string
@@ -26,6 +28,14 @@ export async function sendInvoiceData(
   const response = await fetch(destination, options);
 
   if (!response.ok) {
+    if (response.status === 400) {
+      const jsonResponse = await response.json();
+      throw new InvoiceValidationError(
+        `Error fetching ${destination} due to validation error: ${JSON.stringify(
+          jsonResponse
+        )}`
+      );
+    }
     throw new InvoiceServiceHTTPError(
       `${response.status} ${response.statusText} error fetching ${destination}`
     );

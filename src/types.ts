@@ -4,8 +4,8 @@ export interface KeyValuePairs {
   [key: string]: string;
 }
 
-export interface BlockMap {
-  [key: string]: Textract.Block;
+export interface BlockFile {
+  Blocks: Textract.BlockList;
 }
 
 interface Attachment {
@@ -31,7 +31,7 @@ export interface ProcessedKey {
 }
 
 export interface ProcessedResult {
-  blocks?: BlockMap;
+  blocks?: Textract.BlockList;
   kvp: KeyValuePairs;
   meta: MetaData;
 }

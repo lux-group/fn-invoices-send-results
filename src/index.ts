@@ -5,8 +5,8 @@ import {
   ProcessedKey,
   ProcessedResult,
   KeyValuePairs,
-  BlockMap,
-  MetaData
+  MetaData,
+  BlockFile
 } from "./types";
 
 export class FileValidationError extends Error {}
@@ -45,7 +45,9 @@ const mergeProcessResults = async (
 ): Promise<ProcessedResult> => {
   const result: ProcessedResult = {} as ProcessedResult;
 
-  console.log(`Merging files ${keyList.join(",")} in ${srcBucket}`);
+  console.log(
+    `Merging files ${keyList.map(key => key.keyName).join(",")} in ${srcBucket}`
+  );
 
   for (const key of keyList) {
     const response = await s3
@@ -54,13 +56,21 @@ const mergeProcessResults = async (
         Key: key.keyValue
       })
       .promise();
-    result[
-      key.keyName as keyof {
-        kvp: KeyValuePairs;
-        blocks: BlockMap;
-        meta: MetaData;
-      }
-    ] = JSON.parse(response.Body?.toString() || "");
+    const responseBody = response.Body;
+    if (!responseBody) {
+      throw new FileValidationError("Failed to retrieve file Body");
+    }
+    if (key.keyName === "blocks") {
+      result[key.keyName] =
+        (JSON.parse(responseBody.toString()) as BlockFile).Blocks || [];
+    } else {
+      result[
+        key.keyName as keyof {
+          kvp: KeyValuePairs;
+          meta: MetaData;
+        }
+      ] = JSON.parse(responseBody.toString());
+    }
   }
 
   if (!result.kvp || !result.meta) {
@@ -74,35 +84,26 @@ const moveToProcessed = async (
   keyList: string[],
   srcBucket: string
 ): Promise<void> => {
-  const copyRequests: Promise<object>[] = [];
-  const deleteRequests: Promise<object>[] = [];
-
-  console.log(`Merging files ${keyList.join(",")} in ${srcBucket}`);
-
-  keyList.forEach(key => {
+  for (const key of keyList) {
     if (!isFolderDirectory(key)) {
-      copyRequests.push(
-        s3
-          .copyObject({
-            CopySource: `${srcBucket}/${key}`,
-            Bucket: srcBucket,
-            Key: key.replace(/extracted\//, "processed/")
-          })
-          .promise()
-      );
-      deleteRequests.push(
-        s3
-          .deleteObject({
-            Bucket: srcBucket,
-            Key: key
-          })
-          .promise()
-      );
-    }
-  });
+      console.log(`Copying ${key} to /processed`);
+      await s3
+        .copyObject({
+          CopySource: `${srcBucket}/${key}`,
+          Bucket: srcBucket,
+          Key: key.replace(/extracted\//, "processed/")
+        })
+        .promise();
 
-  await Promise.all(copyRequests);
-  await Promise.all(deleteRequests);
+      console.log(`Deleting ${key} under /extracted`);
+      await s3
+        .deleteObject({
+          Bucket: srcBucket,
+          Key: key
+        })
+        .promise();
+    }
+  }
 };
 
 const getVendorDomain = (srcKey: string): string => {
@@ -145,10 +146,10 @@ export const handler = async (event: S3Event): Promise<string> => {
 
     await moveToProcessed(keyList, srcBucket);
 
-    console.log("SUCCESS")
+    console.log("SUCCESS");
     return "Finished sending results with files moved to /processed";
   } catch (error) {
-    console.error(`FAILURE: ${error.message}`)
+    console.error(`FAILURE: ${error.message}`);
     return JSON.stringify(error, null, 2);
   }
 };

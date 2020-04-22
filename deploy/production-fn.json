@@ -16,7 +16,11 @@
       "Variables": {
         "BUCKET_NAME": "le-prod-stp-textract-results",
         "NODE_ENV": "production",
-        "APP_NAME": "prod-fn-invoices-send-results"
+        "APP_NAME": "prod-fn-invoices-send-results",
+        "SERVICE_PASSWORD": "",
+        "SERVICE_USERNAME": "",
+        "VENDOR_DOMAIN_WHITELIST": "",
+        "API_HOST": ""
       }
     },
     "KMSKeyArn": "",
