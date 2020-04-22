@@ -84,9 +84,9 @@ const moveToProcessed = async (
   keyList: string[],
   srcBucket: string
 ): Promise<void> => {
+  console.log(`Moving files to /processed`);
   for (const key of keyList) {
     if (!isFolderDirectory(key)) {
-      console.log(`Copying ${key} to /processed`);
       await s3
         .copyObject({
           CopySource: `${srcBucket}/${key}`,
@@ -94,8 +94,6 @@ const moveToProcessed = async (
           Key: key.replace(/extracted\//, "processed/")
         })
         .promise();
-
-      console.log(`Deleting ${key} under /extracted`);
       await s3
         .deleteObject({
           Bucket: srcBucket,
