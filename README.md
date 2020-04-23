@@ -1,4 +1,4 @@
-# Straight Through Processing (STP) Textract Results 
+# Sending Textract Results To SVC-Invoices
 
 [![CircleCI](https://circleci.com/gh/brandsExclusive/fn-invoices-send-results.svg?style=svg)](https://circleci.com/gh/brandsExclusive/fn-invoices-send-results)
 
