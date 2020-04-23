@@ -8,6 +8,7 @@ import {
   MetaData,
   BlockFile
 } from "./types";
+import { VENDOR_DOMAIN_WHITELIST } from "./config"
 
 export class FileValidationError extends Error {}
 
@@ -108,11 +109,11 @@ const getVendorDomain = (srcKey: string): string => {
   const vendorDomainMatches = srcKey.match(/\/([a-z\.]+)\//);
   if (!vendorDomainMatches || vendorDomainMatches.length !== 2) {
     throw new VendorValidationError(
-      "Could not determin vendorDomain from object key"
+      "Could not determine vendorDomain from object key"
     );
   }
   const vendorDomain = vendorDomainMatches[1];
-  if (!vendorDomain.split(",").includes(vendorDomain)) {
+  if (!VENDOR_DOMAIN_WHITELIST.split(",").includes(vendorDomain)) {
     throw new VendorValidationError("Vendor domain not whitelisted");
   }
   return vendorDomain;
