@@ -27,17 +27,20 @@ export async function sendInvoiceData(
   console.log(`Sending processed data of ${vendorDomain} to svc-invoice`);
   const response = await fetch(destination, options);
 
-  if (!response.ok) {
-    if (response.status === 400) {
-      const jsonResponse = await response.json();
-      throw new InvoiceValidationError(
-        `Error fetching ${destination} due to validation error: ${JSON.stringify(
-          jsonResponse
-        )}`
-      );
-    }
-    throw new InvoiceServiceHTTPError(
-      `${response.status} ${response.statusText} error fetching ${destination}`
+  if (response.ok) {
+    return;
+  }
+
+  if (response.status === 400) {
+    const jsonResponse = await response.json();
+    throw new InvoiceValidationError(
+      `Error fetching ${destination} due to validation error: ${JSON.stringify(
+        jsonResponse
+      )}`
     );
   }
+
+  throw new InvoiceServiceHTTPError(
+    `${response.status} ${response.statusText} error fetching ${destination}`
+  );
 }
