@@ -1,0 +1,30 @@
+{
+    "FunctionName": "fn-invoices-send-results-production",
+    "Runtime": "nodejs12.x",
+    "Role": "arn:aws:iam::801230920622:role/le-prod-stp-execution",
+    "Handler": "index.handler",
+    "Description": "Invoices Send Results Production",
+    "Timeout": 15,
+    "MemorySize": 128,
+    "VpcConfig": {
+      "SubnetIds": [
+      ],
+      "SecurityGroupIds": [
+      ]
+    },
+    "Environment": {
+      "Variables": {
+        "BUCKET_NAME": "le-prod-stp-textract-results",
+        "NODE_ENV": "production",
+        "APP_NAME": "prod-fn-invoices-send-results",
+        "SERVICE_PASSWORD": "",
+        "SERVICE_USERNAME": "",
+        "VENDOR_DOMAIN_WHITELIST": "",
+        "API_HOST": ""
+      }
+    },
+    "KMSKeyArn": "",
+    "Tags": {
+      "KeyName": ""
+    }
+  }

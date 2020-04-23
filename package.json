@@ -1,0 +1,45 @@
+{
+  "name": "fn-invoices-send-results",
+  "version": "1.0.0",
+  "description": "Triggers on new files in S3 stp-textract-results, post data to invoices service and move data to /processed in S3",
+  "main": "index.js",
+  "repository": "https://github.com/brandsExclusive/fn-invoices-send-results",
+  "author": "Ryan Tian",
+  "license": "None",
+  "private": true,
+  "scripts": {
+    "build": "yarn run transpile && cp package.json dist/. && cd dist && yarn install --prod",
+    "transpile": "rm -rf dist && tsc",
+    "test": "yarn run lint && yarn run transpile",
+    "lint": "eslint src --ext .ts",
+    "lint-fix": "yarn run lint --fix",
+    "smoke": "env $(cat .env) ts-node smoke.ts",
+    "deploy-test": "yarn deploy test dist",
+    "deploy-production": "yarn deploy production dist",
+    "deploy": "yarn update-deploy-repo && .deploy/deploy-jenkins.sh",
+    "update-deploy-repo": "git clone git@github.com:brandsExclusive/infra-jenkins-fn-deploy.git --depth 1 .deploy 2> /dev/null || (cd .deploy; git pull)",
+    "logs-test": "aws logs tail /aws/lambda/fn-inovices-send-results-test --follow",
+    "logs-production": "aws logs tail /aws/lambda/fn-inovices-send-results-production --follow"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.8.3",
+    "@babel/preset-typescript": "^7.8.3",
+    "@types/aws-lambda": "^8.10.46",
+    "@types/node": "^13.7.7",
+    "@typescript-eslint/eslint-plugin": "^2.17.0",
+    "@typescript-eslint/parser": "^2.17.0",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.9.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "fetch-mock-jest": "^1.1.0",
+    "jest": "^24.9.0",
+    "prettier": "^1.19.1",
+    "ts-node": "^8.6.2",
+    "typescript": "^3.7.5"
+  },
+  "dependencies": {
+    "@types/node-fetch": "^2.5.6",
+    "aws-sdk": "^2.631.0",
+    "node-fetch": "^2.6.0"
+  }
+}

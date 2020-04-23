@@ -1,0 +1,30 @@
+{
+    "FunctionName": "fn-invoices-send-results-test",
+    "Runtime": "nodejs12.x",
+    "Role": "arn:aws:iam::801230920622:role/le-test-stp-execution",
+    "Handler": "index.handler",
+    "Description": "Invoices Send Results Test",
+    "Timeout": 15,
+    "MemorySize": 128,
+    "VpcConfig": {
+      "SubnetIds": [
+      ],
+      "SecurityGroupIds": [
+      ]
+    },
+    "Environment": {
+      "Variables": {
+        "BUCKET_NAME": "le-test-stp-textract-results",
+        "NODE_ENV": "test",
+        "APP_NAME": "test-fn-invoices-send-results",
+        "SERVICE_PASSWORD": "",
+        "SERVICE_USERNAME": "",
+        "VENDOR_DOMAIN_WHITELIST": "",
+        "API_HOST": "https://test-api.luxgroup.com"
+      }
+    },
+    "KMSKeyArn": "",
+    "Tags": {
+      "KeyName": ""
+    }
+  }
