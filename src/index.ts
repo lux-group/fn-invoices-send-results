@@ -8,7 +8,7 @@ import {
   MetaData,
   BlockFile
 } from "./types";
-import { VENDOR_DOMAIN_WHITELIST } from "./config"
+import { VENDOR_DOMAIN_WHITELIST } from "./config";
 
 export class FileValidationError extends Error {}
 
