@@ -22,7 +22,7 @@ export async function sendInvoiceData(
     }
   };
 
-  const destination = `${API_HOST}/api/invoices/flights/${vendorDomain}`;
+  const destination = `${API_HOST}/api/invoices/flights/vendors/${vendorDomain}`;
 
   console.log(`Sending processed data of ${vendorDomain} to svc-invoice`);
   const response = await fetch(destination, options);
